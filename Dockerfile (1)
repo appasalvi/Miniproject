@@ -8,20 +8,29 @@
 
 
 # Node 14
-FROM node:20.18.1-alpine3.20
+# FROM node:fermium
+# Node 18
+# FROM node:18
+FROM ubuntu:22.04
+MAINTAINER Tamas Kecskes <tamas.kecskes@vanderbilt.edu>
 # on top of node we need Python
-RUN apk update
-RUN apk add --no-cache make g++ git python3 py3-pip py3-setuptools dotnet6-sdk pythonispython3 graphviz
-RUN pip3 install --break-system-packages webgme-bindings lark graphviz
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git \
+    curl \
+    apt-transport-https \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    build-essential
 
 # Install Node.js (which includes npm) from NodeSource
-#RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-#&& apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
 # we also need the latest webgme-bindings to be able to run python plugins
 # RUN pip install webgme_bindings
-#RUN pip3 install --upgrade pip setuptools wheel
-
+RUN pip3 install --upgrade pip setuptools wheel
+RUN pip3 install webgme-bindings
 
 # just creating the directories where our webgme server will run
 RUN mkdir /usr/app
@@ -30,15 +39,13 @@ WORKDIR /usr/app
 # copy app source
 ADD config /usr/app/config/
 ADD src /usr/app/src/
-ADD package.json /usr/app/
+# ADD package.json /usr/app/
+COPY package*.json ./
 ADD webgme-setup.json /usr/app/
 ADD app.js /usr/app/
 
 # Install webgme
 RUN npm install webgme
-
-# Install node-modules
-RUN npm install -g webgme-cli
 
 # Install node-modules
 RUN npm install
