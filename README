@@ -94,9 +94,9 @@ Follow these steps to add a new plugin:
 
 Follow these steps to add a new plugin based on an existing project in your server:
 - enter the container `docker compose exec webgme sh`
-- `webgme new plugin MyPluginName`
+- `webgme new plugin --language Python CodeGenerator`
 - exit container with `exit`
-- copy webgme plugin directory `docker compose cp webgme:/usr/app/src/plugins/MyPluginName src/plugins/`
+- copy webgme plugin directory `docker compose cp webgme:/usr/app/src/plugins/CodeGenerator src/plugins/`
 
 ### Adding new visualizer to your DS
 Follow these steps to add a new visualizer:
