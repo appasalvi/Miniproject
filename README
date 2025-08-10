@@ -1,0 +1,117 @@
+# MiniProject
+
+## Deployment
+
+### Initialization
+The easiest way to start using this project is to fork it in git. Assuming you fork, you can start-up following this few simple steps:
+- install [Docker-Desktop](https://www.docker.com/products/docker-desktop)
+- clone the repository
+- `docker compose build`
+- `docker compose up -d`
+
+Connect to your server at http://localhost:8888
+
+### Main docker commands
+All of the following commands should be used from your main project directory (where this file also should be):
+- To **rebuild** the complete solution `docker compose build` (and follow with the `docker compose up -d` to restart the server)
+- To **debug** using the logs of the WebGME service `docker compose logs webgme`
+- To **stop** the server just use `docker compose stop`
+- To **enter** the WebGME container and use WebGME commands `docker compose exec webgme bash` (you can exit by simply closing the command line with linux command 'exit')
+- To **clean** the host machine of unused (old version) images `docker system prune -f`
+
+## Functions
+
+### Basic seed with the meta-model:
+    '/StateMachineJoint-main/src/seeds/StateMachine/Homework6WebGME.webgmex'
+
+### Plugins and their features:
+*  Code generation: input your visual representation of the turtle code, the function generates the text based representation that can be run with a turtle framework
+
+        'src/plugins/CodeGenerator/CodeGenerator/__init__.py'
+
+*  Export: A variant of the code generation, that will allow the resulting code for download
+*  Import: Given a simple turtle code, the plugin is capable of generating the visual model representation.
+*  Execution: Generates some picture format out of the code (svg/png/whatnot).
+
+### Visualizer
+
+* Creates an SVG of the canvas
+
+## How to use the Design Studio
+
+* Represent your code's control flow through commands.
+* Click on the plugins button and run to execute the functionality, whether it's the code generation, export to download, import to restore, or to publish an image.
+
+## Installation of the Design Studio
+
+## Using WebGME commands to add components to your project
+In general, you can use any WebGME commands after you successfully entered the WebGME container. It is important to note that only the src directory is shared between the container and the host machine, so you need to additionally synchronize some files after finishing your changes inside the container! The following is few scenarios that frequently occur:
+
+### Adding new npm dependency
+When you need to install a new library you should follow these steps:
+- enter the container
+- `npm i -s yourNewPackageName`
+- exit the container
+- copy the package.json file `docker compose cp webgme:/usr/app/package.json package.json`
+
+## Adding iCore to your DS
+Enter the container `docker compose exec webgme sh`
+
+```
+webgme import viz ICore webgme-icore
+```
+
+Once imported and server is restarted, register the visualizer at the nodes where it should be used. If the `'scriptCode'` attribute (configurable) isn't defined the model will have meta-violations after saving the code.
+
+### Python specifics
+In general we do not recommend to use the python mode unless the users on the deployment
+are trustworthy and/or the deployment doesn't deal with sensitive data.
+
+In order to enable python execution you need to import the `PyCoreExecutor` plugin.
+
+```
+webgme import plugin PyCoreExecutor webgme-icore
+```
+
+and `config.plugin.allowServerExecution = true;` must be added in the config.
+
+Since the python mode will run user defined code on the back-end we strongly recommend using
+[webgme-docker-worker-manager](https://www.npmjs.com/package/webgme-docker-worker-manager).
+together with a version of `./DockerfilePyCoreExecutor`. (For an example of the configuration parameters
+needed for this to work check out `./config/config.docker.js` and `./docker-compose.yml`.)
+
+Finally import the router that serves the python source code documentation:
+```
+webgme import router BindingsDocs webgme-bindings
+```
+
+Exit container `exit`
+
+### Adding new interpreter/plugin to your DS
+Follow these steps to add a new plugin:
+- for JS plugin: `webgme new plugin MyPluginName`
+- for Python plugin: `webgme new plugin --language Python MyPluginName`
+
+Follow these steps to add a new plugin based on an existing project in your server:
+- enter the container `docker compose exec webgme sh`
+- `webgme new plugin MyPluginName`
+- exit container with `exit`
+- copy webgme plugin directory `docker compose cp webgme:/usr/app/src/plugins/MyPluginName src/plugins/`
+
+### Adding new visualizer to your DS
+Follow these steps to add a new visualizer:
+- enter the container `docker compose exec webgme sh`
+- `npm run webgme new viz MyVisualizerName`
+- exit container `exit`
+- copy webgme-setup.json `docker compose cp webgme:/usr/app/webgme-setup.json webgme-setup.json`
+- copy webgme-config `docker compose cp webgme:/usr/app/config/config.webgme.js config/config.webgme.js`
+
+docker compose cp -R webgme:/usr/app/src src
+
+### Adding new seed to your DS
+Follow these steps to add a new seed based on an existing project in your server:
+- enter the container `docker compose exec webgme sh`
+- `webgme new seed MyProjectName --seed-name MySeedName`
+- exit container with `exit`
+- copy webgme-setup.json `docker compose cp webgme:/usr/app/webgme-setup.json webgme-setup.json`
+- copy webgme-config `docker compose cp webgme:/usr/app/config/config.webgme.js config/config.webgme.js`
